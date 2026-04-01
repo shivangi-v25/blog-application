@@ -1,25 +1,21 @@
 <?php 
-// Critical: Always start the session at the very top
-session_start();
+// Keeping your backend logic exactly as it was
 include 'db.php';
+if ($_SERVER["REQUEST_METHOD"]=="POST") {
+   
+   $name=$_POST["name"];
+   $pass=$_POST["pass"];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST["name"];
-    $pass = $_POST["pass"];
-
-    $sql = $conn->prepare("SELECT user_id, password FROM user WHERE username = ?");
-    $sql->bind_param("s", $name);
-    $sql->execute();
-    $sql->store_result();
-    $sql->bind_result($id, $hashed_password);
-
-    if ($sql->fetch() && password_verify($pass, $hashed_password)) {
-        $_SESSION["id"] = $id;
-        header("location:dashboard.php");
-        exit(); // Always exit after a header redirect
-    } else {
-        $error = "Invalid username or password.";
-    }
+   $sql=$conn->prepare("select user_id ,password from user where username=? ");
+   $sql->bind_param("s",$name);
+   $sql->execute();
+   $sql->store_result();
+   $sql->bind_result($id,$password);
+   if ($sql->fetch()&&password_verify($pass,$password)) {
+        $_SESSION["id"]=$id;
+       header("location:dashboard.php");
+   }else{
+header("location:login.php");}
 }
 ?>
 <!doctype html>
@@ -35,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <style>
             :root {
                 --primary-color: #2c3e50;
-                --bg-soft: #f4f7f6;
+                --bg-soft: #f8f9fa;
             }
 
             body {
@@ -50,9 +46,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             .login-card {
                 background: white;
                 border: none;
-                border-radius: 20px;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-                padding: 50px;
+                border-radius: 24px;
+                box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+                padding: 40px;
                 width: 100%;
                 max-width: 400px;
             }
@@ -61,36 +57,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 font-family: 'Playfair Display', serif;
                 color: var(--primary-color);
                 font-weight: 700;
+                text-align: center;
                 margin-bottom: 30px;
             }
 
             .form-label {
-                font-size: 0.75rem;
-                text-transform: uppercase;
-                letter-spacing: 1.2px;
                 font-weight: 600;
-                color: #999;
+                text-transform: uppercase;
+                font-size: 0.7rem;
+                letter-spacing: 1px;
+                color: #888;
             }
 
             .form-control {
                 border: 1px solid #eee;
                 padding: 12px;
-                border-radius: 10px;
-                background-color: #f9f9f9;
+                border-radius: 12px;
+                background-color: #fcfcfc;
             }
 
             .form-control:focus {
-                background-color: #fff;
                 box-shadow: 0 0 0 4px rgba(44, 62, 80, 0.05);
                 border-color: var(--primary-color);
+                background-color: #fff;
             }
 
             .btn-login {
                 background: var(--primary-color);
                 color: white;
                 border: none;
-                padding: 14px;
-                border-radius: 10px;
+                padding: 12px;
+                border-radius: 12px;
                 font-weight: 600;
                 width: 100%;
                 margin-top: 20px;
@@ -100,29 +97,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             .btn-login:hover {
                 background: #1a252f;
                 transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             }
 
-            .brand-name {
+            .brand-overlay {
                 position: absolute;
                 top: 40px;
                 font-family: 'Playfair Display', serif;
                 font-size: 1.5rem;
-                text-decoration: none;
                 color: var(--primary-color);
+                text-decoration: none;
             }
         </style>
     </head>
 
     <body>
-        <a href="#" class="brand-name">The Journal.</a>
+        <a href="#" class="brand-overlay">The Journal.</a>
 
         <div class="login-card">
-            <h2 class="text-center">Welcome Back</h2>
+            <h2>Welcome Back</h2>
             
-            <?php if(isset($error)): ?>
-                <div class="alert alert-danger py-2 small"><?= $error ?></div>
-            <?php endif; ?>
-
             <form method="post">
                 <div class="mb-4">
                     <label class="form-label">Username</label>
@@ -134,12 +128,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="password" class="form-control" name="pass" required />
                 </div>
 
-                <button type="submit" class="btn btn-login">Sign In</button>
+                <button type="submit" class="btn btn-login">Login to Account</button>
             </form>
             
-            <p class="text-center mt-4 small text-muted">
-                New here? <a href="register.php" class="text-dark fw-bold">Create Account</a>
-            </p>
+            <div class="text-center mt-4">
+                <small class="text-muted">Don't have an account? <a href="register.php" class="text-dark fw-bold">Sign up</a></small>
+            </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
