@@ -138,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"]=="POST") {
 
                         <div class="mb-4">
                             <label class="form-label">Content</label>
-                            <textarea class="form-control" name="content" rows="8" required><?=$data["content"] ?></textarea>
+                            <textarea class="form-control" name="content" rows="2" required><?=$data["content"] ?></textarea>
                         </div>
 
                         <div class="mb-4 p-3 bg-light rounded-4">

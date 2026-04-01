@@ -1,109 +1,147 @@
-
 <?php 
-
+// Critical: Always start the session at the very top
+session_start();
 include 'db.php';
-if ($_SERVER["REQUEST_METHOD"]=="POST") {
-   
-   $name=$_POST["name"];
-   $pass=$_POST["pass"];
 
-   $sql=$conn->prepare("select user_id ,password from user where username=? ");
-   $sql->bind_param("s",$name);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST["name"];
+    $pass = $_POST["pass"];
+
+    $sql = $conn->prepare("SELECT user_id, password FROM user WHERE username = ?");
+    $sql->bind_param("s", $name);
     $sql->execute();
     $sql->store_result();
-    $sql->bind_result($id,$password);
-    if ($sql->fetch()&&password_verify($pass,$password)) {
-        $_SESSION["id"]=$id;
-       header("location:dashboard.php");
-    }else{
-header("location:login.php");}
+    $sql->bind_result($id, $hashed_password);
 
-
+    if ($sql->fetch() && password_verify($pass, $hashed_password)) {
+        $_SESSION["id"] = $id;
+        header("location:dashboard.php");
+        exit(); // Always exit after a header redirect
+    } else {
+        $error = "Invalid username or password.";
+    }
 }
-
-
-
 ?>
 <!doctype html>
 <html lang="en">
     <head>
-        <title>Title</title>
-        <!-- Required meta tags -->
+        <title>Login - The Journal</title>
         <meta charset="utf-8" />
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, shrink-to-fit=no"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-        <!-- Bootstrap CSS v5.2.1 -->
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-            crossorigin="anonymous"
-        />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+        <style>
+            :root {
+                --primary-color: #2c3e50;
+                --bg-soft: #f4f7f6;
+            }
+
+            body {
+                background-color: var(--bg-soft);
+                font-family: 'Inter', sans-serif;
+                height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .login-card {
+                background: white;
+                border: none;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+                padding: 50px;
+                width: 100%;
+                max-width: 400px;
+            }
+
+            h2 {
+                font-family: 'Playfair Display', serif;
+                color: var(--primary-color);
+                font-weight: 700;
+                margin-bottom: 30px;
+            }
+
+            .form-label {
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1.2px;
+                font-weight: 600;
+                color: #999;
+            }
+
+            .form-control {
+                border: 1px solid #eee;
+                padding: 12px;
+                border-radius: 10px;
+                background-color: #f9f9f9;
+            }
+
+            .form-control:focus {
+                background-color: #fff;
+                box-shadow: 0 0 0 4px rgba(44, 62, 80, 0.05);
+                border-color: var(--primary-color);
+            }
+
+            .btn-login {
+                background: var(--primary-color);
+                color: white;
+                border: none;
+                padding: 14px;
+                border-radius: 10px;
+                font-weight: 600;
+                width: 100%;
+                margin-top: 20px;
+                transition: 0.3s;
+            }
+
+            .btn-login:hover {
+                background: #1a252f;
+                transform: translateY(-2px);
+            }
+
+            .brand-name {
+                position: absolute;
+                top: 40px;
+                font-family: 'Playfair Display', serif;
+                font-size: 1.5rem;
+                text-decoration: none;
+                color: var(--primary-color);
+            }
+        </style>
     </head>
 
     <body>
-        <header>
-            <!-- place navbar here -->
-        </header>
-        <main>
+        <a href="#" class="brand-name">The Journal.</a>
 
-<div
-    class="container col-4 bg-secondary shadow border rounded-pill"
->
-   <form  method="post" class="p-3  mt-3">
+        <div class="login-card">
+            <h2 class="text-center">Welcome Back</h2>
+            
+            <?php if(isset($error)): ?>
+                <div class="alert alert-danger py-2 small"><?= $error ?></div>
+            <?php endif; ?>
 
-<h4 class="text-center text-light">Login</h4>
+            <form method="post">
+                <div class="mb-4">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control" name="name" required />
+                </div>
 
+                <div class="mb-4">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" name="pass" required />
+                </div>
 
-<div class="mb-3">
-    <label for="" class="form-label">UserName</label>
-    <input
-        type="text"
-        class="form-control"
-        name="name"
-        id=""
-        aria-describedby="helpId"
-        placeholder=""
-    />
-</div>
+                <button type="submit" class="btn btn-login">Sign In</button>
+            </form>
+            
+            <p class="text-center mt-4 small text-muted">
+                New here? <a href="register.php" class="text-dark fw-bold">Create Account</a>
+            </p>
+        </div>
 
-<div class="mb-3">
-    <label for="" class="form-label">Password</label>
-    <input
-        type="text"
-        class="form-control"
-        name="pass"
-        id=""
-        aria-describedby="helpId"
-        placeholder=""
-    />
-</div>
-
-<button type="submit" class="btn btn-success">login</button>
-
-   </form>
-</div>
-
-
-
-        </main>
-        <footer>
-            <!-- place footer here -->
-        </footer>
-        <!-- Bootstrap JavaScript Libraries -->
-        <script
-            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-            crossorigin="anonymous"
-        ></script>
-
-        <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
-            crossorigin="anonymous"
-        ></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>
